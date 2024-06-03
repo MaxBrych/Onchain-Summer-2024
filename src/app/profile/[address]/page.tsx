@@ -43,6 +43,7 @@ const themes = {
 };
 
 export default function ProfilePage() {
+
   const [currentTheme, setCurrentTheme] = useState("light");
   const [themeCSS, setThemeCSS] = useState("");
   const address = useAddress();
@@ -50,17 +51,22 @@ export default function ProfilePage() {
   const { address: walletAddress } = useParams();
   const { mutateAsync: upload } = useStorageUpload();
 
-  // Smart contract information
+  // Write the current theme to the smart contract adress
+
   const contractAddress = "0x7b0Be0B88762f0b9c2526A1B87E5E95A0a47EF55";
   const { contract } = useContract(contractAddress);
   const { mutateAsync: setThemeCID } = useContractWrite(contract, "setThemeCID");
   const { data: cid, isLoading, error } = useContractRead(contract, "getThemeCID", [walletAddress]);
+
+// Save the theme to IPFS (Inter Planetary File System) and return the CID (Content Identifier)
 
   const saveThemeToIPFS = async (theme: any) => {
     const file = new File([theme], "theme.css");
     const uris = await upload({ data: [file] });
     return uris[0]; // Return the URI of the uploaded file
   };
+
+// Load the theme from IPFS using the CID (Content Identifier)
 
   const loadThemeFromIPFS = async (cid: any) => {
     const response = await fetch(cid.replace("ipfs://", "https://ipfs.io/ipfs/"));
@@ -69,6 +75,8 @@ export default function ProfilePage() {
     }
     return await response.text();
   };
+
+// Change the theme based on the user selection
 
   const changeTheme = async (theme: any) => {
     const css = themes[theme as keyof typeof themes];
@@ -79,6 +87,8 @@ export default function ProfilePage() {
     saveCIDOnChain(cid);
   };
 
+  // Save the CID on-chain
+
   const saveCIDOnChain = async (cid: any) => {
     try {
       const tx = await setThemeCID({ args: [cid] });
@@ -87,6 +97,8 @@ export default function ProfilePage() {
       console.error("Error saving CID on-chain:", error);
     }
   };
+
+  // Load the CID from the chain
 
   const loadCIDFromChain = async () => {
     if (!cid) return;
@@ -101,12 +113,17 @@ export default function ProfilePage() {
     }
   };
 
+  // Initialize the Airstack API
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY as string);
       setApiInitialized(true);
     }
   }, []);
+
+  // Load the theme from IPFS when the CID changes
+  // This will happen when the user changes the theme or when the page is loaded
 
   useEffect(() => {
     if (cid) {
@@ -122,6 +139,8 @@ export default function ProfilePage() {
     enabled: apiInitialized && !!walletAddress,
   } as any);
 
+  // Log the variables being sent to the API
+
   useEffect(() => {
     if (apiInitialized && walletAddress) {
       console.log("Variables being sent:", { identity: walletAddress });
@@ -135,6 +154,8 @@ export default function ProfilePage() {
         Error: {(error as any)?.message || (queryError as any).message}
       </div>
     );
+
+  // Render the profile section
 
   const renderProfileSection = (profile: any) => (
     <div className=" border-gray-300 p-6 mt-6 w-full max-w-2xl">

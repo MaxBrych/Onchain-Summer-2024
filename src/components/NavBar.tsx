@@ -14,6 +14,12 @@ import { ethers } from "ethers";
 import { Base } from "@thirdweb-dev/chains";
 import { Button } from "./ui/button";
 
+// Navbar component
+// This component is used to display the navbar at the top of the page
+// It contains the ConnectWallet button and a button to switch networks
+// The ConnectWallet button is used to connect the user's wallet
+// The switch network button is used to switch the network to the correct network	
+
 export default function Navbar() {
   const address = useAddress();
   const disconnect = useDisconnect();
@@ -36,6 +42,7 @@ export default function Navbar() {
     }
   }, [chainId]);
 
+  // Function to handle the profile redirect
   const handleProfileRedirect = () => {
     if (address) {
       router.push(`/profile/${address}`);
