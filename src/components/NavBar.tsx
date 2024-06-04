@@ -14,7 +14,7 @@ import { ethers } from "ethers";
 import { Base } from "@thirdweb-dev/chains";
 import { Button } from "./ui/button";
 import { usePathname } from 'next/navigation';
-import { RiUserSmileFill, RiHomeHeartFill, } from "@remixicon/react";
+import { RiUserSmileFill, RiHomeHeartFill, RiEdit2Fill } from "@remixicon/react";
 
 export default function Navbar() {
   const address = useAddress();
@@ -74,6 +74,7 @@ export default function Navbar() {
           ) : (
             <div className="flex gap-1 align-middle">
               <Button className="flex gap-1 align-middle" onClick={() => router.push("/")}><RiHomeHeartFill size={20} color="currentColor" />Go Home</Button>
+              <Button className="flex gap-1 align-middle" onClick={() => router.push("/editor")}><RiEdit2Fill size={20} color="currentColor" />Edit Theme</Button>
             </div>
           )}
         </div>
