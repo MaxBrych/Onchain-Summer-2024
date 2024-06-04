@@ -128,7 +128,13 @@ export default function ProfilePage() {
     }
   }, [apiInitialized, walletAddress]);
 
-  if (isLoading || loading) return <div className="text-black  text-center mt-20">Loading...</div>;
+  useEffect(() => {
+    if (data) {
+      console.log("Farcaster feed data:", data.FarcasterCasts.Cast);
+    }
+  }, [data]);
+
+  if (isLoading || loading) return <div className="text-black text-center mt-20">Loading...</div>;
   if (error || queryError)
     return (
       <div className="text-red-500 text-center mt-20">
@@ -137,7 +143,7 @@ export default function ProfilePage() {
     );
 
   const renderProfileSection = (profile: any) => (
-    <div className=" border-gray-300 p-6 mt-6 w-full max-w-2xl">
+    <div className="border-gray-300 p-6 mt-6 w-full max-w-2xl">
       <div className="flex items-center space-x-4">
         <img
           src={profile.profileImage}
@@ -164,23 +170,6 @@ export default function ProfilePage() {
       <h1 className="text-3xl font-bold mt-6">Profile Page</h1>
       <style>{themeCSS}</style>
       <div className={currentTheme}></div>
-      {/* 
-      {data?.Wallet && (
-        <div className=" p-6 mt-6 w-full max-w-2xl text-center">
-           
-          <img
-            src={data.Wallet.primaryDomain?.avatar}
-            alt={data.Wallet.primaryDomain?.name}
-            className="w-24 h-24 rounded-full mx-auto"
-          />
-          <h2 className="text-xl font-bold mt-2">{data.Wallet.primaryDomain?.name}</h2>
-          <p className="mt-2">Address: {data.Wallet.addresses[0]}</p>
-          <p className="mt-1 text-sm text-gray-400">
-            XMTP: {data.Wallet.xmtp[0]?.isXMTPEnabled ? "Enabled" : "Disabled"}
-          </p>
-        </div>
-      )}
-      */}
       {data?.farcasterSocials?.Social &&
         data.farcasterSocials.Social.map((profile: any, index: any) => (
           <div key={index} className="w-full max-w-2xl">

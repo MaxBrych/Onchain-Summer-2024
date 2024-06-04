@@ -1,14 +1,52 @@
 import React from "react";
 
 const CastsList = ({ casts }: any) => {
+  const renderEmbed = (embed: any) => {
+    const url = embed.url;
+
+    if (!url) {
+      return null;
+    }
+
+    if (url.includes("imagedelivery.net") || url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+      return <img src={url} alt="Embedded Image" className="mt-2" />;
+    }
+
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId;
+      if (url.includes("youtube.com")) {
+        videoId = new URL(url).searchParams.get("v");
+      } else {
+        videoId = url.split("/").pop();
+      }
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+      return (
+        <iframe
+          width="560"
+          height="315"
+          src={embedUrl}
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="mt-2"
+        ></iframe>
+      );
+    }
+
+    return null;
+  };
+
   return (
-    <div className="  p-6 mt-6 w-full max-w-2xl">
+    <div className="p-6 mt-6 w-full max-w-2xl">
       <h2 className="text-xl font-bold mb-4">Farcaster Casts</h2>
       {casts.length > 0 ? (
         casts.map((cast: any, index: any) => (
           <div key={index} className="border-b border-gray-300 py-4">
             <p className="text-gray-400">{new Date(cast.castedAtTimestamp).toLocaleString()}</p>
             <p className="mt-2">{cast.text}</p>
+            {cast.embeds &&
+              cast.embeds.map((embed: any, i: any) => <div key={i}>{renderEmbed(embed)}</div>)}
             <div className="mt-2 flex space-x-4 text-sm text-gray-400">
               <span>Recasts: {cast.numberOfRecasts}</span>
               <span>Likes: {cast.numberOfLikes}</span>
