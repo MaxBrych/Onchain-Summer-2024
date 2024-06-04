@@ -2,11 +2,23 @@ import React from "react";
 
 const CastsList = ({ casts }: any) => {
   const renderEmbed = (embed: any) => {
-    if (embed.type === "image") {
-      return <img src={embed.url} alt="Embedded Image" className="mt-2" />;
+    const url = embed.url;
+
+    if (!url) {
+      return null;
     }
-    if (embed.type === "youtube") {
-      const videoId = new URL(embed.url).searchParams.get("v");
+
+    if (url.includes("imagedelivery.net") || url.match(/\.(jpeg|jpg|gif|png)$/) != null) {
+      return <img src={url} alt="Embedded Image" className="mt-2" />;
+    }
+
+    if (url.includes("youtube.com") || url.includes("youtu.be")) {
+      let videoId;
+      if (url.includes("youtube.com")) {
+        videoId = new URL(url).searchParams.get("v");
+      } else {
+        videoId = url.split("/").pop();
+      }
       const embedUrl = `https://www.youtube.com/embed/${videoId}`;
       return (
         <iframe
@@ -21,6 +33,7 @@ const CastsList = ({ casts }: any) => {
         ></iframe>
       );
     }
+
     return null;
   };
 
