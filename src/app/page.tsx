@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { ConnectWallet, useAddress } from "@thirdweb-dev/react";
 import { useRouter } from "next/navigation";
-import { RiWallet3Fill } from "@remixicon/react";
 
 const client = process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID;
 
@@ -31,7 +30,6 @@ export default function Home() {
           Explore your onchain identity and style it
         </h1>
         <form onSubmit={handleSearchSubmit} className="flex items-center w-full max-w-md relative">
-        <RiWallet3Fill size={36} color="currentColor" className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-400" />
           <input
             type="text"
             placeholder="Enter wallet address"

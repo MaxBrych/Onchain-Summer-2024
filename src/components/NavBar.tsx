@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { ethers } from "ethers";
 import { Base } from "@thirdweb-dev/chains";
 import { Button } from "./ui/button";
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const address = useAddress();
@@ -24,6 +25,7 @@ export default function Navbar() {
   const [ensRecords, setEnsRecords] = useState<Record<string, string>>({});
   const [isLoading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const pathname = usePathname()
   const router = useRouter();
 
   useEffect(() => {
@@ -41,6 +43,8 @@ export default function Navbar() {
       router.push(`/profile/${address}`);
     }
   };
+
+  const isProfilePage = pathname.includes("/profile/");
 
   return (
     <div className="w-full rounded-xl py-2 px-4">
@@ -62,9 +66,13 @@ export default function Navbar() {
             >
               Switch Network
             </button>
-          ) : (
+          ) : !isProfilePage ? (
             <div className="flex gap-1 align-middle">
               <Button onClick={handleProfileRedirect}>Go to your profile</Button>
+            </div>
+          ) : (
+            <div className="flex gap-1 align-middle">
+              <Button onClick={() => router.push("/")}>Go Home</Button>
             </div>
           )}
         </div>
