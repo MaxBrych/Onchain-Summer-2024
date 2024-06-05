@@ -74,7 +74,7 @@ export default function Navbar() {
           ) : (
             <div className="flex gap-1 align-middle">
               <Button className="flex gap-1 align-middle" onClick={() => router.push("/")}><RiHomeHeartFill size={20} color="currentColor" />Go Home</Button>
-              <Button className="flex gap-1 align-middle" onClick={() => router.push("/editor")}><RiEdit2Fill size={20} color="currentColor" />Edit Theme</Button>
+              <Button className="flex gap-1 align-middle" onClick={() => router.push(`/editor/${chainId}`)}><RiEdit2Fill size={20} color="currentColor" />Edit Theme</Button>
             </div>
           )}
         </div>
