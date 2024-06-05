@@ -1,0 +1,47 @@
+{
+    "root": {
+        "colors": {
+            "primary": "#007bff",
+            "secondary": "#6c757d",
+            "success": "#28a745",
+            "danger": "#dc3545",
+            "warning": "#ffc107",
+            "info": "#17a2b8",
+            "light": "#f8f9fa",
+            "dark": "#343a40"
+        },
+        "gradients": {
+            "base_grad": {
+                "direction": "45deg",
+                "colors": {
+                    "1": "#ffffff",
+                    "2": "#000000"
+                }
+            }
+        }
+    },
+    "css_classes": {
+        "#theme_body": {
+            "background": "#ffffff",
+            "color": "#000000",
+            "border": {
+                "color": "#ffffff",
+                "width": "1px",
+                "type": "solid"
+            },
+            "font": {
+                "font-family": "Arial, sans-serif",
+                "font-size": "14px"
+            }
+        },
+        ".side_bar": {
+            "background": "#ffffff",
+            "color": "#000000",
+            "border": {
+                "color": "#ffffff",
+                "width": "1px",
+                "type": "solid"
+            }
+        }
+    }
+}
