@@ -25,26 +25,26 @@ import {
 import { FaPen } from "react-icons/fa";
 
 const themes = {
-  light: `
-    body { background-color: white; color: black; }
-    .bg { background-color: white; }
-    .text { color: black; }
-  `,
-  dark: `
-    body { background-color: black; color: white; }
-    .bg { background-color: black; }
-    .text { color: white; }
-  `,
-  highContrast: `
-    body { background-color: #0052ff; color: white; }
-    .bg { background-color: #0052ff; }
-    .text { color: white; }
-  `,
+  light: {
+    body: { backgroundColor: "white", color: "black" },
+    bg: { backgroundColor: "white" },
+    text: { color: "black" },
+  },
+  dark: {
+    body: { backgroundColor: "black", color: "white" },
+    bg: { backgroundColor: "black" },
+    text: { color: "white" },
+  },
+  highContrast: {
+    body: { backgroundColor: "#0052ff", color: "white" },
+    bg: { backgroundColor: "#0052ff" },
+    text: { color: "white" },
+  },
 };
 
 export default function ProfilePage() {
   const [currentTheme, setCurrentTheme] = useState("light");
-  const [themeCSS, setThemeCSS] = useState("");
+  const [themeJSON, setThemeJSON] = useState(themes.light);
   const address = useAddress();
   const [apiInitialized, setApiInitialized] = useState(false);
   const { address: walletAddress } = useParams();
@@ -57,7 +57,9 @@ export default function ProfilePage() {
   const { data: cid, isLoading, error } = useContractRead(contract, "getThemeCID", [walletAddress]);
 
   const saveThemeToIPFS = async (theme: any) => {
-    const file = new File([theme], "theme.css");
+    const file = new File([JSON.stringify(theme)], "theme.json", {
+      type: "application/json",
+    });
     const uris = await upload({ data: [file] });
     return uris[0]; // Return the URI of the uploaded file
   };
@@ -67,14 +69,14 @@ export default function ProfilePage() {
     if (!response.ok) {
       throw new Error("Failed to fetch the theme from IPFS");
     }
-    return await response.text();
+    return await response.json();
   };
 
   const changeTheme = async (theme: any) => {
-    const css = themes[theme as keyof typeof themes];
-    setThemeCSS(css);
+    const themeObj = themes[theme as keyof typeof themes];
+    setThemeJSON(themeObj);
     setCurrentTheme(theme);
-    const cid = await saveThemeToIPFS(css);
+    const cid = await saveThemeToIPFS(themeObj);
     console.log(`Theme saved with CID: ${cid}`);
     saveCIDOnChain(cid);
   };
@@ -93,9 +95,9 @@ export default function ProfilePage() {
     console.log("IPFS CID:", cid);
 
     try {
-      const themeCSS = await loadThemeFromIPFS(cid);
-      setThemeCSS(themeCSS);
-      console.log("Loaded theme from IPFS:", themeCSS);
+      const themeJSON = await loadThemeFromIPFS(cid);
+      setThemeJSON(themeJSON);
+      console.log("Loaded theme from IPFS:", themeJSON);
     } catch (error) {
       console.error("Error loading CID from chain:", error);
     }
@@ -114,6 +116,12 @@ export default function ProfilePage() {
     }
   }, [cid]);
 
+  useEffect(() => {
+    if (apiInitialized && walletAddress) {
+      console.log("Variables being sent:", { identity: walletAddress });
+    }
+  }, [apiInitialized, walletAddress]);
+
   const {
     data,
     loading,
@@ -123,16 +131,25 @@ export default function ProfilePage() {
   } as any);
 
   useEffect(() => {
-    if (apiInitialized && walletAddress) {
-      console.log("Variables being sent:", { identity: walletAddress });
-    }
-  }, [apiInitialized, walletAddress]);
-
-  useEffect(() => {
     if (data) {
       console.log("Farcaster feed data:", data.FarcasterCasts.Cast);
     }
   }, [data]);
+
+  useEffect(() => {
+    const applyTheme = (theme: any) => {
+      for (const element in theme) {
+        const styles = theme[element];
+        const elements = document.querySelectorAll(`.${element}`);
+        elements.forEach((el) => {
+          for (const style in styles) {
+            (el as HTMLElement).style[style as any] = styles[style];
+          }
+        });
+      }
+    };
+    applyTheme(themeJSON);
+  }, [themeJSON]);
 
   if (isLoading || loading) return <div className="text-black text-center mt-20">Loading...</div>;
   if (error || queryError)
@@ -143,14 +160,14 @@ export default function ProfilePage() {
     );
 
   const renderProfileSection = (profile: any) => (
-    <div className="border-gray-300 p-6 mt-6 w-full max-w-2xl">
+    <div className="border-gray-300 p-6 mt-6 w-full max-w-2xl bg">
       <div className="flex items-center space-x-4">
         <img
           src={profile.profileImage}
           alt={profile.profileName}
           className="w-24 h-24 rounded-full"
         />
-        <div>
+        <div className="text">
           <h2 className="text-xl font-bold">{profile.profileDisplayName}</h2>
           <p className="text-gray-400">@{profile.profileHandle}</p>
           <p className="mt-2">{profile.profileBio}</p>
@@ -163,12 +180,8 @@ export default function ProfilePage() {
   );
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center p-6"
-      style={{ backgroundColor: currentTheme }}
-    >
-      <h1 className="text-3xl font-bold mt-6">Profile Page</h1>
-      <style>{themeCSS}</style>
+    <div className="min-h-screen flex flex-col items-center p-6 body">
+      <h1 className="text-3xl font-bold mt-6 text">Profile Page</h1>
       <div className={currentTheme}></div>
       {data?.farcasterSocials?.Social &&
         data.farcasterSocials.Social.map((profile: any, index: any) => (
