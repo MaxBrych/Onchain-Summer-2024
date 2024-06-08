@@ -174,6 +174,12 @@ export default function ProfilePage() {
           <p className="mt-1 text-sm text-gray-400">
             Followers: {profile.followerCount} | Following: {profile.followingCount}
           </p>
+          {data?.Wallet?.xmtp && (
+            <div className="mt-6 flex gap-2 w-full max-w-2xl">
+              <p>XMTP Status: </p>
+              <p>{data.Wallet.xmtp.isXMTPEnabled ? "Enabled" : "Not Enabled"}</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -190,6 +196,7 @@ export default function ProfilePage() {
           </div>
         ))}
       {data?.FarcasterCasts?.Cast && <CastsList casts={data.FarcasterCasts.Cast} />}
+
       {address && address.toLowerCase() === (walletAddress as string)?.toLowerCase() && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
