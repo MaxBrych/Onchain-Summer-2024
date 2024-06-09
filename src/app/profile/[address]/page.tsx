@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { init, useQuery } from "@airstack/airstack-react";
 import GET_PROFILE_INFO from "../../graphql/query";
 import CastsList from "@/components/CastsList";
@@ -48,7 +48,10 @@ export default function ProfilePage() {
   const address = useAddress();
   const [apiInitialized, setApiInitialized] = useState(false);
   const { address: walletAddress } = useParams();
+  const router = useRouter();
   const { mutateAsync: upload } = useStorageUpload();
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Smart contract information
   const contractAddress = "0x7b0Be0B88762f0b9c2526A1B87E5E95A0a47EF55";
@@ -57,9 +60,7 @@ export default function ProfilePage() {
   const { data: cid, isLoading, error } = useContractRead(contract, "getThemeCID", [walletAddress]);
 
   const saveThemeToIPFS = async (theme: any) => {
-    const file = new File([JSON.stringify(theme)], "theme.json", {
-      type: "application/json",
-    });
+    const file = new File([JSON.stringify(theme)], "theme.json", { type: "application/json" });
     const uris = await upload({ data: [file] });
     return uris[0]; // Return the URI of the uploaded file
   };
@@ -73,7 +74,7 @@ export default function ProfilePage() {
   };
 
   const changeTheme = async (theme: any) => {
-    const themeObj = themes[theme as keyof typeof themes];
+    const themeObj = themes[theme];
     setThemeJSON(themeObj);
     setCurrentTheme(theme);
     const cid = await saveThemeToIPFS(themeObj);
@@ -81,7 +82,7 @@ export default function ProfilePage() {
     saveCIDOnChain(cid);
   };
 
-  const saveCIDOnChain = async (cid: any) => {
+  const saveCIDOnChain = async (cid) => {
     try {
       const tx = await setThemeCID({ args: [cid] });
       console.log("CID saved on-chain:", cid);
@@ -105,7 +106,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY as string);
+      init(process.env.NEXT_PUBLIC_AIRSTACK_API_KEY);
       setApiInitialized(true);
     }
   }, []);
@@ -126,9 +127,11 @@ export default function ProfilePage() {
     data,
     loading,
     error: queryError,
-  } = useQuery(GET_PROFILE_INFO, { identity: walletAddress }, {
-    enabled: apiInitialized && !!walletAddress,
-  } as any);
+  } = useQuery(
+    GET_PROFILE_INFO,
+    { identity: walletAddress },
+    { enabled: apiInitialized && !!walletAddress }
+  );
 
   useEffect(() => {
     if (data) {
@@ -143,7 +146,7 @@ export default function ProfilePage() {
         const elements = document.querySelectorAll(`.${element}`);
         elements.forEach((el) => {
           for (const style in styles) {
-            (el as HTMLElement).style[style as any] = styles[style];
+            el.style[style] = styles[style];
           }
         });
       }
@@ -155,9 +158,13 @@ export default function ProfilePage() {
   if (error || queryError)
     return (
       <div className="text-red-500 text-center mt-20">
-        Error: {(error as any)?.message || (queryError as any).message}
+        Error: {error?.message || queryError.message}
       </div>
     );
+
+  const handleDirectMessageClick = () => {
+    router.push(`/chat/${walletAddress}`);
+  };
 
   const renderProfileSection = (profile: any) => (
     <div className="border-gray-300 p-6 mt-6 w-full max-w-2xl bg">
@@ -180,6 +187,9 @@ export default function ProfilePage() {
               <p>{data.Wallet.xmtp.isXMTPEnabled ? "Enabled" : "Not Enabled"}</p>
             </div>
           )}
+          <Button onClick={handleDirectMessageClick} className="ml-2">
+            Direct Message
+          </Button>
         </div>
       </div>
     </div>
@@ -196,8 +206,7 @@ export default function ProfilePage() {
           </div>
         ))}
       {data?.FarcasterCasts?.Cast && <CastsList casts={data.FarcasterCasts.Cast} />}
-
-      {address && address.toLowerCase() === (walletAddress as string)?.toLowerCase() && (
+      {address && address.toLowerCase() === walletAddress.toLowerCase() && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="fixed bottom-4 text-black right-4">
