@@ -1,5 +1,6 @@
 "use client";
 import { Inter } from "next/font/google";
+import { XMTPProvider } from "@xmtp/react-sdk";
 import "./globals.css";
 import {
   ThirdwebProvider,
@@ -32,12 +33,14 @@ export default function RootLayout({
           localWallet(),
         ]}
       >
-        <body className={inter.className}>
-          <main>
-            <Navbar />
-            {children}
-          </main>
-        </body>
+        <XMTPProvider>
+          <body className={inter.className}>
+            <main>
+              <Navbar />
+              {children}
+            </main>
+          </body>
+        </XMTPProvider>
       </ThirdwebProvider>
     </html>
   );
