@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { init, useQuery } from "@airstack/airstack-react";
 import GET_PROFILE_INFO from "../../graphql/query";
 import CastsList from "@/components/CastsList";
@@ -46,6 +46,7 @@ export default function ProfilePage() {
   const [currentTheme, setCurrentTheme] = useState("light");
   const [themeJSON, setThemeJSON] = useState(themes.light);
   const address = useAddress();
+  const router = useRouter();
   const [apiInitialized, setApiInitialized] = useState(false);
   const { address: walletAddress } = useParams();
   const { mutateAsync: upload } = useStorageUpload();
@@ -159,6 +160,10 @@ export default function ProfilePage() {
       </div>
     );
 
+  const handleDirectMessageClick = () => {
+    router.push(`/chat/${walletAddress}`);
+  };
+
   const renderProfileSection = (profile: any) => (
     <div className="border-gray-300 p-6 mt-6 w-full max-w-2xl bg">
       <div className="flex items-center space-x-4">
@@ -174,6 +179,15 @@ export default function ProfilePage() {
           <p className="mt-1 text-sm text-gray-400">
             Followers: {profile.followerCount} | Following: {profile.followingCount}
           </p>
+          {data?.Wallet?.xmtp && (
+            <div className="mt-6 flex gap-2 w-full max-w-2xl">
+              <p>XMTP Status: </p>
+              <p>{data.Wallet.xmtp.isXMTPEnabled ? "Enabled" : "Not Enabled"}</p>
+            </div>
+          )}
+          <Button onClick={handleDirectMessageClick} className="ml-2">
+            Direct Message
+          </Button>
         </div>
       </div>
     </div>
@@ -190,7 +204,7 @@ export default function ProfilePage() {
           </div>
         ))}
       {data?.FarcasterCasts?.Cast && <CastsList casts={data.FarcasterCasts.Cast} />}
-      {address && address.toLowerCase() === (walletAddress as string)?.toLowerCase() && (
+      {address && address === walletAddress && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="fixed bottom-4 text-black right-4">

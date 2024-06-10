@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { ethers } from "ethers";
 import { Base } from "@thirdweb-dev/chains";
 import { Button } from "./ui/button";
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
 import { RiUserSmileFill, RiHomeHeartFill, RiEdit2Fill } from "@remixicon/react";
 
 export default function Navbar() {
@@ -26,7 +26,7 @@ export default function Navbar() {
   const [ensRecords, setEnsRecords] = useState<Record<string, string>>({});
   const [isLoading, setLoading] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const pathname = usePathname()
+  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -67,14 +67,32 @@ export default function Navbar() {
             >
               Switch Network
             </button>
-          ) : !isProfilePage ? (
-            <div className="flex gap-1 align-middle">
-              <Button className="flex gap-1 align-middle" onClick={handleProfileRedirect}><RiUserSmileFill size={20} color="currentColor" />Go to your profile</Button>
-            </div>
           ) : (
             <div className="flex gap-1 align-middle">
-              <Button className="flex gap-1 align-middle" onClick={() => router.push("/")}><RiHomeHeartFill size={20} color="currentColor" />Go Home</Button>
-              <Button className="flex gap-1 align-middle" onClick={() => router.push(`/editor/${chainId}`)}><RiEdit2Fill size={20} color="currentColor" />Edit Theme</Button>
+              {!isProfilePage && (
+                <Button className="flex gap-1 align-middle" onClick={handleProfileRedirect}>
+                  <RiUserSmileFill size={20} color="currentColor" />
+                  Go to your profile
+                </Button>
+              )}
+              {isProfilePage && (
+                <>
+                  <Button className="flex gap-1 align-middle" onClick={() => router.push("/")}>
+                    <RiHomeHeartFill size={20} color="currentColor" />
+                    Go Home
+                  </Button>
+                  <Button
+                    className="flex gap-1 align-middle"
+                    onClick={() => router.push(`/editor/${chainId}`)}
+                  >
+                    <RiEdit2Fill size={20} color="currentColor" />
+                    Edit Theme
+                  </Button>
+                </>
+              )}
+              <Button className="flex gap-1 align-middle" onClick={disconnect}>
+                Disconnect
+              </Button>
             </div>
           )}
         </div>
