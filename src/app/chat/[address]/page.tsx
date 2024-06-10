@@ -5,22 +5,26 @@ import {
   Client,
   useStreamMessages,
   useClient,
-  useMessages,
-  useConversations,
   useCanMessage,
   useStartConversation,
+  Conversation,
 } from "@xmtp/react-sdk";
-import { ethers } from "ethers";
 import { useAddress, useSigner } from "@thirdweb-dev/react";
 
+interface Message {
+  senderAddress: string;
+  content: string;
+}
+
 export default function ChatPage() {
-  const { address: chatAddress } = useParams();
+  const { address: rawChatAddress } = useParams();
+  const chatAddress = Array.isArray(rawChatAddress) ? rawChatAddress[0] : rawChatAddress;
   const userAddress = useAddress();
   const signer = useSigner();
   const [client, setClient] = useState<Client | null>(null);
-  const [conversation, setConversation] = useState(null);
+  const [conversation, setConversation] = useState<Conversation | null>(null);
   const [message, setMessage] = useState("");
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<Message[]>([]);
 
   const { initialize } = useClient();
   const { startConversation } = useStartConversation();
@@ -36,38 +40,19 @@ export default function ChatPage() {
     if (!signer) return;
     const options = {
       persistConversations: false,
-      env: "dev",
+      env: "production" as "production",
     };
-    const walletSigner = signer.getSigner();
-    const initializedClient = await initialize({ signer: walletSigner, options });
-    setClient(initializedClient);
-  };
-
-  const startChat = async () => {
-    if (client && (await canMessage(chatAddress))) {
-      const conversation = await startConversation(chatAddress);
-      setConversation(conversation);
+    const initializedClient = await initialize({ signer, options });
+    if (initializedClient) {
+      setClient(initializedClient);
     }
   };
 
-  useEffect(() => {
-    if (client && chatAddress) {
-      startChat();
-    }
-  }, [client, chatAddress]);
-
-  const onMessage = useCallback((message) => {
+  const onMessage = useCallback((message: Message) => {
     setHistory((prevMessages) => [...prevMessages, message]);
   }, []);
 
-  useEffect(() => {
-    if (conversation) {
-      const { unsubscribe } = useStreamMessages(conversation, { onMessage });
-      return () => unsubscribe();
-    }
-  }, [conversation, onMessage]);
-
-  const sendMessage = async (e) => {
+  const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (conversation && message.trim()) {
       await conversation.send(message);
@@ -77,7 +62,7 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center p-6">
-      <h1 className="text-3xl font-bold mt-6">Chat with {chatAddress}</h1>
+      <h1 className="mt-6">Chat with {chatAddress}</h1>
       <div className="w-full max-w-2xl mt-6">
         <div className="bg-white p-4 rounded-lg shadow-lg">
           <div className="h-64 overflow-y-scroll p-4 border border-gray-300 rounded-lg mb-4">
