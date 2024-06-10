@@ -204,7 +204,7 @@ export default function ProfilePage() {
           </div>
         ))}
       {data?.FarcasterCasts?.Cast && <CastsList casts={data.FarcasterCasts.Cast} />}
-      {address && address.toLowerCase() === walletAddress && (
+      {address && address === walletAddress && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="fixed bottom-4 text-black right-4">
