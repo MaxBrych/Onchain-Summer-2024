@@ -11,6 +11,12 @@ const nextConfig = {
       },
     });
 
+    if (isServer) {
+      config.output.webassemblyModuleFilename = "static/chunks/[name].wasm";
+    } else {
+      config.optimization.moduleIds = "named";
+    }
+
     return config;
   },
 };
